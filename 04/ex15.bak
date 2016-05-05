@@ -1,0 +1,8 @@
+#lang racket
+(define-struct student (id name major))
+;;A student is (make-point number string string)
+;;it represent id number name and major of student.
+;;Interpretation:
+;;id= Identication of student
+;;name= name of the studenr
+;;major=major of student
