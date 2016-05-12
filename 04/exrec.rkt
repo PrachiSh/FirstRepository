@@ -1,3 +1,3 @@
 #lang racket
 (require 2htdp/image)
-(bitmap "IMG_0612.JPG")
+(rectangle 6 9 "solid" "blue")

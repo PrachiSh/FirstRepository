@@ -1,0 +1,5 @@
+#lang racket
+(require 2htdp/image)
+(define my-image (bitmap "IMG_0612.JPG"))
+
+

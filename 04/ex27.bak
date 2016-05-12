@@ -1,0 +1,2 @@
+#lang racket
+(append (list "hop" "skip") (list "jump"))
