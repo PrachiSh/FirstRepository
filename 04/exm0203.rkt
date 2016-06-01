@@ -1,0 +1,25 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname exm0203) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(define (initial-machine c ch nc nch)
+  (cond [(= nc 0)  "out of coffee" ]
+        [(= nch 0) "out of hot choc"]
+        [else (machinenext c ch nc nch)]))
+(define (machinenext c ch nc nch)
+  (cond [ (< c nc) (remaining-coffee c nc)]
+        [ (< ch nch) (remainingchoc ch nch)]
+        [else "out of item"]))
+(define (remaining-coffee c nc)
+  (- nc c)
+  )
+(define (remainingchoc ch nch)
+  (- nch ch)
+  )
+(define (machine-bank c ch)
+  ( + (* c 1.50) (* ch 0.60)))
+
+(initial-machine 3 5 10 10 )
+
+
+        
+        
