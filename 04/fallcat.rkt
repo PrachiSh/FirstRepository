@@ -1,4 +1,7 @@
-#lang racket
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname fallcat) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+
 ;;falling cat
 ;;cat fall from top of a scene
 ;;starts with (main 0(
@@ -57,6 +60,16 @@
              (world-paused? w))))
 
 ;;tests
+(begin-for-test
+  (check-equal? 
+    (world-after-tick unpaused-world-at-20) 
+    unpaused-world-at-28
+    "in unpaused world, the cat should fall CATSPEED pixels and world should still be unpaused")
+
+  (check-equal? 
+    (world-after-tick paused-world-at-20)
+    paused-world-at-20
+    "in paused world, cat should be unmoved"))
 
 ;;world-to-scene: world->scene
 ;;given: a world
@@ -66,6 +79,18 @@
                (world-pos w)
                EMPTY-CANVAS))
 
+;;tests
+(define image-at-20 (place-image CAT-IMAGE CAT-X-COORD 20 EMPTY-CANVAS))
+(begin-for-test
+  (check-equal? 
+    (world-to-scene unpaused-world-at-20)
+    image-at-20
+    "test of (world-to-scene unpaused-world-at-20)")
+
+  (check-equal?
+    (world-to-scene paused-world-at-20)
+    image-at-20
+    "test of (world-to-scene paused-world-at-20)"))
 
 ;;world-fter-key-event: keyevent -> World
 (define (world-after-key-event w kev)
@@ -83,7 +108,7 @@
 (begin-for-test
   (check-equal?
     (world-after-key-event paused-world-at-20 pause-key-event)
-    paused-world-at-20
+    unpaused-world-at-20
     "after pause key, a paused world should become unpaused")
 
 
@@ -96,3 +121,5 @@
     (world-after-key-event unpaused-world-at-20 non-pause-key-event)
     unpaused-world-at-20
     "after a non-pause key, an unpaused world should be unchanged"))
+
+(main 0)
