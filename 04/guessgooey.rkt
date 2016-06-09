@@ -27,11 +27,11 @@
   (place-image/align HELP-TEXT2 80 150 "left" "bottom"
   (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))))
 
-(struct interval (small big))
+(define-struct interval (small big))
 
-(define interval-10-to-80 ( interval 10 80))
-(define interval-10-to-44 (interval 10 44))
-(define interval-46-to-80 (interval 80 46))
+(define interval-10-to-80 (make-interval 10 80))
+(define interval-10-to-44 (make-interval 10 44))
+(define interval-46-to-80 (make-interval 46 80))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,7 +41,7 @@
 ;;EFFECT: run simulation, intervals starts to change according to key events
 ;;RETURNS : intervals to find number
 (define (start lower upper)
-  (big-bang (interval lower upper)
+  (big-bang (make-interval lower upper)
   (on-key deal-with-guess)
   (to-draw render)
  (stop-when single? render-last-scene)))
@@ -63,25 +63,25 @@
 ;;GIVEN : a world after a key event "down"
 ;;RETURN: chnage the upper limit of interval
 (define (smaller w)
-  (interval (interval-small w)
+  (make-interval (interval-small w)
             (max (interval-small w) (sub1 (guess w)))))
 
 (begin-for-test
   (check-equal?
-  (smaller interval-10-to-80) (interval 10 44)))
+  (smaller interval-10-to-80) (make-interval 10 44)))
 
 
 ;;bigger : world -> world
 ;;GIVEN : a world after key event "up"
 ;;RETURN : change the lower limit of interval
 (define (bigger w)
-  (interval (min (interval-big w) (add1 (guess w)))
+  (make-interval (min (interval-big w) (add1 (guess w)))
             (interval-big w)))
 
 
 (begin-for-test
  (check-equal?
-  (bigger interval-10-to-80) interval-46-to-80))
+  (bigger interval-10-to-80) (make-interval 46 80)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;guess world -> interger
