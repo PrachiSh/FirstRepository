@@ -28,6 +28,8 @@
             (on-draw draw-world)))
 
 (define REC-IMAGE (rectangle RECW RECH "outline" "blue"))
+(define CIR-IMAGE (circle 30 "outline" "red"))
+(define ELP-IMAGE (ellipse 30 60 "solid" "blue"))
 
 (define HALF-REC-WIDTH  (/ (image-width  REC-IMAGE) 2))
 (define HALF-REC-HEIGHT (/ (image-height REC-IMAGE) 2))
@@ -41,21 +43,22 @@
 (define-struct rec( REC-IMAGE x-pos y-pos vel-x vel-y selected?))
 
 (define (initial-world w)
- (make-world (cons (make-rec REC-IMAGE (/ CANVAS-WIDTH 2) (/ CANVAS-HEIGHT 2) 0 0 false) empty)))
+ (make-world  empty))
 
 (define (world-after-key-event w k)
   (cond [(key=? k "n" ) (updated-world  w)]))
 
 (define (updated-world w)
   (make-world
-   (cons (make-rec REC-IMAGE (/ CANVAS-WIDTH 2) (/ CANVAS-HEIGHT 2) 0 0 true) empty)))
+   (cons (make-rec REC-IMAGE (/ CANVAS-WIDTH 2) (/ CANVAS-HEIGHT 2) 0 0 true) (world-LOR w))))
 
 (define (draw-world w)
   (draw-list (world-LOR w )))
 
 (define (draw-list l)
-  (cond [(empty?  l) empty-canvas]
-        [else (overlay (place-rec (first l)) (draw-list (rest l)))]))
+  (cond [(empty? l) empty-canvas]
+        [(equal? (length l) 1) (place-image CIR-IMAGE 100 100 empty-canvas)]
+        [else (place-image ELP-IMAGE 150 100 empty-canvas)]))
 
  
 (define (place-rec c)
@@ -105,3 +108,4 @@
       (+ (rec-y-pos r) HALF-REC-HEIGHT))))
 
 
+(main 0)
