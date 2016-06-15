@@ -183,18 +183,17 @@
 ;;RETURN : a scene with rectangles with there velocity at center 
 (define (draw-list l)
   (cond [(empty? l) empty-canvas]
-        [else  (draw-dots-outer ( place-image  (overlay-velocity l) (rec-x-pos (first l)) (rec-y-pos (first l)) (draw-list (rest l))) (first l))]))
+        [else (draw-dots-outer ( place-image  (overlay-velocity l) (rec-x-pos (first l)) (rec-y-pos (first l)) (draw-list (rest l))) (first l))]))
 
-  (define (draw-dots-outer scene r)
+ (define (draw-dots-outer scene r)
     (cond [(empty? (rec-LOD r)) scene]
-          [else  (draw-inner (rec-LOD r) scene) ])
-          
-    )
+          [else (draw-dots-inner (rec-LOD r) scene)]))
 
-(define (draw-inner lod scene)
+(define (draw-dots-inner lod scene)
   (cond [(empty? lod) scene]
-        [else (place-image (dot-CIR-IMAGE (first lod)) (dot-x-dot (first lod)) (dot-y-dot (first lod)) (draw-inner (rest lod) scene))]))
+        [else (place-image (dot-CIR-IMAGE (first lod)) (dot-x-dot (first lod)) (dot-y-dot (first lod)) (draw-dots-inner (rest lod) scene))])) 
 
+       
 ;;overlay-velocity : list -> image
 ;;GIVEN : list
 ;;RETURN : an image of velocity on rectangles
