@@ -37,7 +37,7 @@
 
 (define empty-canvas (empty-scene CANVAS-WIDTH CANVAS-HEIGHT))
 
-(define CIR-IMAGE (circle 5 "solid" "black"))
+(define CIR-IMAGE (circle 1 "solid" "black"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -119,18 +119,16 @@
        [(key=? k "down") (de-y-vel r)]
        [(key=? k "left") (de-x-vel r)]
        [(key=? k "right") (in-x-vel r)]
-       [(key=? k "d") (rec-pen-down r )]
-       [(key=? k "u") (rec-pen-up r)]))
+       [(and (rec-is-selected? r) (key=? k "d")) (rec-pen-down r )]
+       [(and (rec-is-selected? r) (key=? k "u")) (rec-pen-up r)]
+       [else r]))
 
 (define (rec-pen-down r)
-  (if (rec-is-selected? r)
-  (make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) true)
-  r))
+(make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r)  (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) true))
 
 (define (rec-pen-up r)
-  (if (rec-is-selected? r)
-      (make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true empty false)
-  r))
+(make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) false))  
+
 
 
 ;;in-y-vel : rectangle -> rectabgle
@@ -176,14 +174,12 @@
 (define (draw-world w)
   (draw-list (world-LOR w)))
 
-  ;(draw-dots-outer (draw-list (world-LOR w)) (world-LOR w))
-
 ;;draw-list : list -> scene
 ;;GIVEN : a list
 ;;RETURN : a scene with rectangles with there velocity at center 
 (define (draw-list l)
   (cond [(empty? l) empty-canvas]
-        [else (draw-dots-outer ( place-image  (overlay-velocity l) (rec-x-pos (first l)) (rec-y-pos (first l)) (draw-list (rest l))) (first l))]))
+        [else (draw-dots-outer ( place-image (overlay-velocity l) (rec-x-pos (first l)) (rec-y-pos (first l)) (draw-list (rest l))) (first l))]))
 
  (define (draw-dots-outer scene r)
     (cond [(empty? (rec-LOD r)) scene]
@@ -233,29 +229,32 @@
 ;;GIVEN : rectangle
 ;;return : rectangle 
 (define (selected-rec r)
-  (make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true (cons (make-dot CIR-IMAGE (rec-x-pos r) (rec-y-pos r)) (rec-LOD r)) false))
+  (cond [(rec-pen-down? r) (make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true (cons (make-dot CIR-IMAGE (rec-x-pos r) (rec-y-pos r)) (rec-LOD r)) true)]
+        [else (make-rec REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) false)]))
 
 ;;cheching-width :rectangle-> rectangle
 ;;GIVEN : rectangle
 ;;return : rectangle with tangential motion along x-aix
 (define (checking-width r)
-  (make-rec REC-IMAGE
-         (+ (rec-x-pos r) (* (rec-vel-x r) -1)) (rec-y-pos r) (* (rec-vel-x r) -1) (rec-vel-y r) false (cons (make-dot CIR-IMAGE (+ (rec-x-pos r) (* (rec-vel-x r) -1)) (rec-y-pos r)) (rec-LOD r)) false) )
-
+     (cond[(rec-pen-down? r) (make-rec REC-IMAGE (+ (rec-x-pos r) (* (rec-vel-x r) -1)) (rec-y-pos r) (* (rec-vel-x r) -1) (rec-vel-y r) false (cons (make-dot CIR-IMAGE (+ (rec-x-pos r) (* (rec-vel-x r) -1)) (rec-y-pos r)) (rec-LOD r)) true)]
+     [else  (make-rec REC-IMAGE (+ (rec-x-pos r) (* (rec-vel-x r) -1)) (rec-y-pos r) (* (rec-vel-x r) -1) (rec-vel-y r) false (rec-LOD r) false)]))
+ 
 ;;cheching-height :rectangle-> rectangle
-
 ;;GIVEN : rectangle
 ;;return : rectangle with tangential motion along y-aix
 (define (checking-height r)
-  (make-rec REC-IMAGE
-           (rec-x-pos r) (+ (rec-y-pos r) (* (rec-vel-y r) -1)) (rec-vel-x r) (* (rec-vel-y r) -1) false (cons (make-dot CIR-IMAGE (rec-x-pos r)  (+ (rec-y-pos r) (* (rec-vel-y r) -1))) (rec-LOD r))  false))
+  (cond[(rec-pen-down? r) (make-rec REC-IMAGE (rec-x-pos r) (+ (rec-y-pos r) (* (rec-vel-y r) -1)) (rec-vel-x r) (* (rec-vel-y r) -1) false (cons (make-dot CIR-IMAGE (rec-x-pos r)  (+ (rec-y-pos r) (* (rec-vel-y r) -1))) (rec-LOD r)) true)]
+       [else (make-rec REC-IMAGE (rec-x-pos r) (+ (rec-y-pos r) (* (rec-vel-y r) -1)) (rec-vel-x r) (* (rec-vel-y r) -1) false (rec-LOD r) false)]))
 
 ;;tick-rec :rectangle-> rectangle
 ;;GIVEN : rectangle
 ;;return : rectangle motion with a tick
 (define (tick-rec r)
-   (make-rec REC-IMAGE
-   (+ (rec-x-pos r) (rec-vel-x r)) (+ (rec-y-pos r) (rec-vel-y r)) (rec-vel-x r) (rec-vel-y r) false (cons (make-dot CIR-IMAGE  (+ (rec-x-pos r) (rec-vel-x r)) (+ (rec-y-pos r) (rec-vel-y r))) (rec-LOD r)) false))
+  (cond [(rec-pen-down? r) 
+         (make-rec REC-IMAGE (+ (rec-x-pos r) (rec-vel-x r))
+                   (+ (rec-y-pos r) (rec-vel-y r)) (rec-vel-x r) (rec-vel-y r) false
+                   (cons (make-dot CIR-IMAGE  (+ (rec-x-pos r) (rec-vel-x r)) (+ (rec-y-pos r) (rec-vel-y r))) (rec-LOD r)) true)]
+        [else (make-rec REC-IMAGE (+ (rec-x-pos r) (rec-vel-x r)) (+ (rec-y-pos r) (rec-vel-y r)) (rec-vel-x r) (rec-vel-y r) false (rec-LOD r) false)]))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;MOUSE EVENTS
@@ -275,6 +274,8 @@
    [else (cons (rec-after-mouse-event (first l) mx my mev ) (lor-after-mouse-event (rest l) mx my mev))]))
 
 ;;rec-after-mouse-event : rectangle x-pos y-pos mouse event -> rectangle x-pos y-pos
+
+
 ;;GIVEN : LOR  x-pos y-pos mouse event
 ;;RETURN : rectangle x-pos y-pos
 (define (rec-after-mouse-event r mx my mev)
@@ -288,7 +289,7 @@
 ;;GIVEN : rectangle, x-pos y-pos of mouse
 ;;RETURN : a rectangle
 (define (rec-after-button-down r x y)
-  (cond [(in-rec? r x y) (make-rec  REC-IMAGE (rec-x-pos r) (rec-y-pos r) (rec-vel-x r) (rec-vel-y r) true empty false)]
+  (cond [(in-rec? r x y) (make-rec  REC-IMAGE (rec-x-pos r) (rec-y-pos r)  (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) (rec-pen-down? r))]
         [else r]))
 
 ;;rec-afte-drag : rectangle x-pos y-pos
@@ -296,7 +297,7 @@
 ;;RETURN : a rectangle at x-pos y-pos
 (define (rec-after-drag r x y)
   (cond [(rec-is-selected? r)
-      (make-rec REC-IMAGE x y (rec-vel-x r) (rec-vel-y r) true empty false)]
+      (make-rec REC-IMAGE x y (rec-vel-x r) (rec-vel-y r) true (rec-LOD r) (rec-pen-down? r))]
       [else r]))
 
 ;;rec-afte-button-up : rectangle x-pos y-pos
@@ -304,7 +305,7 @@
 ;;RETURN : a rectangle at x-pos and y-pos
 (define (rec-after-button-up r x y)
   (if (rec-is-selected? r)
-      (make-rec REC-IMAGE x y (rec-vel-x r) (rec-vel-y r) false empty false)
+      (make-rec REC-IMAGE x y (rec-vel-x r) (rec-vel-y r) false (rec-LOD r) (rec-pen-down? r))
       r))
 
 ;;in-rec? : rectangle x-pos y-pox
